@@ -184,11 +184,11 @@ class _ConfirmNumberState extends State<ConfirmNumber> {
                         }
                       });
                       return Expanded(
-                        child: RawKeyboardListener(
+                        child: KeyboardListener(
                           focusNode: FocusNode(),
-                          onKey: (RawKeyEvent event) {
-                            if (event.isKeyPressed(
-                                    LogicalKeyboardKey.backspace) &&
+                          onKeyEvent: (KeyEvent event) {
+                            if (event is KeyDownEvent && event.logicalKey ==
+                                    LogicalKeyboardKey.backspace &&
                                 controllers[i].text.isEmpty &&
                                 i > 0) {
                               setState(() {

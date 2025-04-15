@@ -409,9 +409,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     height: 46,
                     child: TextButton(
                       style: ButtonStyle(
-                        backgroundColor: const MaterialStatePropertyAll<Color>(
+                        backgroundColor: const WidgetStatePropertyAll<Color>(
                             Color(0xFFDF8946)),
-                        shape: MaterialStateProperty.all<OutlinedBorder>(
+                        shape: WidgetStateProperty.all<OutlinedBorder>(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(11.0),
                           ),

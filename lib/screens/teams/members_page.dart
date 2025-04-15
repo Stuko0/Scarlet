@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:scarlet_app/screens/teams/add_%20members_page.dart';
+import 'package:flutter/services.dart';
+import 'package:scarlet_app/screens/teams/add_members_page.dart';
 import 'package:scarlet_app/screens/teams/manage_member_page.dart';
 
 class MembersPage extends StatefulWidget {
@@ -10,17 +11,19 @@ class MembersPage extends StatefulWidget {
 }
 
 class _MembersPage extends State<MembersPage> {
+  final TextEditingController memberName = TextEditingController();
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return SafeArea(
       child: Scaffold(
-          backgroundColor: Colors.white,
+        resizeToAvoidBottomInset: false,
+          backgroundColor: const Color(0xFFf9fafb),
           appBar: AppBar(
-            backgroundColor: Colors.white,
+            backgroundColor: const Color(0xFFf9fafb),
             title: const Text(
-              "Nombre Equipo",
+              "Equipo",
               style: TextStyle(
                   fontFamily: "DMSans",
                   fontSize: 28,
@@ -38,243 +41,429 @@ class _MembersPage extends State<MembersPage> {
                   Navigator.pop(context);
                 }),
           ),
-          body: Stack(
-            children: [
-              Padding(
-                  padding: EdgeInsets.fromLTRB(screenWidth * 0.06,
-                      screenHeight * 0.01, screenWidth * 0.06, 0),
-                  child: SingleChildScrollView(
-                      child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 20, bottom: 24),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Jefe de Equipo",
-                              style: TextStyle(
-                                  fontFamily: "DMSans",
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.black),
-                            ),
-                            const SizedBox(
-                              height: 12,
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 16, horizontal: 16),
-                              decoration: const BoxDecoration(
-                                  color: Color(0xffBDB76C),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(6))),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const CircleAvatar(
-                                    radius: 28,
-                                    backgroundImage: NetworkImage(
-                                        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1Z4YdnfikmTer3enjn-qQ_Q7woDEMpTsdpDe2IedB_g&s"),
-                                  ),
-                                  const SizedBox(
-                                    width: 12,
-                                  ),
-                                  const Expanded(
-                                    child: Text(
-                                      "Nombre de la Persona",
-                                      style: TextStyle(
-                                          fontFamily: "DMSans",
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.white),
-                                    ),
-                                  ),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      Container(
-                                        height: 28,
-                                        width: 28,
-                                        decoration: const BoxDecoration(
-                                            color: Color(0xffe3e5e9),
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(6))),
-                                        child: const Icon(Icons.fire_truck),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Container(
-                                        height: 28,
-                                        width: 28,
-                                        decoration: const BoxDecoration(
-                                            color: Color(0xffe3e5e9),
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(6))),
-                                        child:
-                                            const Icon(Icons.fire_extinguisher),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
+          body: Padding(
+            padding: EdgeInsets.fromLTRB(screenWidth * 0.06,screenHeight * 0.01, screenWidth * 0.06, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Container(
+                  width: screenWidth,
+                  height: screenHeight * 0.067,
+                  padding: EdgeInsets.only(left: screenWidth * 0.05,),
+                  decoration: BoxDecoration(
+                      color: const Color(0xFFFFFFFF),
+                      border: Border.all(color: const Color(0xFF000000).withAlpha(50)),
+                      borderRadius: BorderRadius.circular(10)),
+                  child: SizedBox(
+                    width: screenWidth * 0.5,
+                    height: screenHeight * 0.08,
+                    child: TextField(
+                      controller: memberName,
+                      keyboardType: TextInputType.name,
+                      inputFormatters: <TextInputFormatter> [
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r"[a-zA-Z ]")),
+                      ],
+                      autofocus: false,
+                      decoration: const InputDecoration(
+                        hintText: "Buscar miembros",
+                        hintStyle: TextStyle(
+                            fontFamily: "DMSans",
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500),
+                        border: InputBorder.none,
                       ),
-                      Padding(
-                          padding: const EdgeInsets.only(bottom: 24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    ),
+                  ),
+                ),
+                Container(height: screenHeight * 0.1, width: screenWidth,
+                  padding: EdgeInsets.only(top: screenHeight * 0.02),
+                  child: Stack(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
                             children: [
                               const Text(
                                 "Miembros",
                                 style: TextStyle(
                                     fontFamily: "DMSans",
                                     fontSize: 20,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF1E1E2C)),
+                              ),
+                              SizedBox(
+                                height: screenHeight * 0.01,
+                              ),
+                              const Text(
+                                "3 miembros",
+                                style: TextStyle(
+                                    fontFamily: "DMSans",
+                                    fontSize: 16,
                                     fontWeight: FontWeight.w400,
-                                    color: Colors.black),
+                                    color: Color(0xFF6B7280)),
                               ),
-                              const SizedBox(
-                                height: 12,
-                              ),
-                              Column(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 16, horizontal: 16),
-                                    decoration: const BoxDecoration(
-                                        color: Color(0xffBDB76C),
-                                        borderRadius: BorderRadius.vertical(
-                                            top: Radius.circular(6))),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const CircleAvatar(
-                                          radius: 28,
-                                          backgroundImage: NetworkImage(
-                                              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1Z4YdnfikmTer3enjn-qQ_Q7woDEMpTsdpDe2IedB_g&s"),
-                                        ),
-                                        const SizedBox(
-                                          width: 12,
-                                        ),
-                                        const Expanded(
-                                          child: Text(
-                                            "Nombre de la Persona",
-                                            style: TextStyle(
-                                                fontFamily: "DMSans",
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                                color: Colors.white),
-                                          ),
-                                        ),
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        const ManageMemberPage()));
-                                          },
-                                          child: Container(
-                                            height: 28,
-                                            width: 28,
-                                            decoration: const BoxDecoration(
-                                                color: Color(0xffe3e5e9),
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(6))),
-                                            child: Icon(
-                                                Icons.person_search_rounded),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 1,
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 16, horizontal: 16),
-                                    decoration: const BoxDecoration(
-                                        color: Color(0xffBDB76C),
-                                        borderRadius: BorderRadius.vertical(
-                                            bottom: Radius.circular(6))),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const CircleAvatar(
-                                          radius: 28,
-                                          backgroundImage: NetworkImage(
-                                              "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1Z4YdnfikmTer3enjn-qQ_Q7woDEMpTsdpDe2IedB_g&s"),
-                                        ),
-                                        const SizedBox(
-                                          width: 12,
-                                        ),
-                                        const Expanded(
-                                          child: Text(
-                                            "Nombre de la Persona",
-                                            style: TextStyle(
-                                                fontFamily: "DMSans",
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                                color: Colors.white),
-                                          ),
-                                        ),
-                                        Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: <Widget>[
-                                            Container(
-                                              height: 28,
-                                              width: 28,
-                                              decoration: const BoxDecoration(
-                                                  color: Color(0xffe3e5e9),
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(6))),
-                                              child: const Icon(
-                                                  Icons.person_search_rounded),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              )
                             ],
-                          ))
-                    ],
-                  ))),
-              Padding(
-                  padding: const EdgeInsets.only(bottom: 42, right: 22),
-                  child: Align(
-                      alignment: Alignment.bottomRight,
-                      child: InkWell(
-                          onTap: () {
-                            Navigator.push(
+                          ),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) =>
-                                        const AddMembersPage()));
-                          },
-                          child: Container(
-                              height: 56,
-                              width: 56,
-                              decoration: const BoxDecoration(
-                                  color: Color(0xffe3e5e9),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(6))),
-                              child: const Icon(Icons.add)))))
-            ],
-          )),
+                                    builder: (context) => const AddMembersPage()),
+                              );
+                            },
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              margin: EdgeInsets.only(top: screenHeight * 0.01),
+                              decoration: BoxDecoration(
+                                  color: const Color(0xFFDC2626),
+                                  borderRadius: BorderRadius.circular(20)),
+                              child: const Center(
+                                child: Text(
+                                  "+",
+                                  style: TextStyle(
+                                      fontFamily: "DMSans",
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white),
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ],
+                  )
+                ),
+                Padding(padding: EdgeInsets.only(top:screenHeight*0.02),
+                  child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.only(top: screenHeight * 0.02, bottom: screenHeight * 0.02, left: screenWidth * 0.03, right: screenWidth * 0.03),
+                            height: screenHeight * 0.17,
+                            width: screenWidth,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFFFFF),
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF000000).withAlpha(50),
+                                  spreadRadius: 1,
+                                  blurRadius: 5,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ClipOval(
+                                      child: Image.network(
+                                        "https://picsum.photos/200",
+                                        width: screenWidth * 0.15,
+                                        height: screenHeight * 0.07,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Padding(padding: EdgeInsets.only(left: screenWidth * 0.02, top: screenHeight * 0.01),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text("Alexander Villanueva",
+                                            style: TextStyle(
+                                                fontFamily: "DMSans",
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                                color: Color(0xFF1E1E2C)),
+                                          ),
+                                          SizedBox(height: screenHeight * 0.01,),
+                                          const Text("Lider del equipo",
+                                            style: TextStyle(
+                                                fontFamily: "DMSans",
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w400,
+                                                color: Color(0xFF1E1E2C)),
+                                          ),
+                                        ],
+                                      ),
+)
+                                  ],
+                                ),
+                                Divider(
+                                  color: Colors.grey[300],
+                                  thickness: 1,
+                                  height: screenHeight * 0.02,
+                                ),
+                                Padding(padding: EdgeInsets.only(top: screenHeight * 0.01),
+                                  child: const Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text("Yo",
+                                        style: TextStyle(
+                                            fontFamily: "DMSans",
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            color: Color(0xFF1E1E2C)),
+                                      ),
+                                      Spacer(),
+                                      Text("Disponible",
+                                        style: TextStyle(
+                                            fontFamily: "DMSans",
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            color: Color(0xFF1E1E2C)),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: screenHeight * 0.02,),
+                          Container(
+                      padding: EdgeInsets.only(top: screenHeight * 0.02, bottom: screenHeight * 0.02, left: screenWidth * 0.03, right: screenWidth * 0.03),
+                      height: screenHeight * 0.17,
+                      width: screenWidth,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFFFFF),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF000000).withAlpha(50),
+                            spreadRadius: 1,
+                            blurRadius: 5,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ClipOval(
+                                child: Image.network(
+                                  "https://picsum.photos/200",
+                                  width: screenWidth * 0.15,
+                                  height: screenHeight * 0.07,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Padding(padding: EdgeInsets.only(left: screenWidth * 0.02, top: screenHeight * 0.01),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text("Chuck Mayo",
+                                      style: TextStyle(
+                                          fontFamily: "DMSans",
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(0xFF1E1E2C)),
+                                    ),
+                                    SizedBox(height: screenHeight * 0.01,),
+                                    const Text("Primeros Auxilios",
+                                      style: TextStyle(
+                                          fontFamily: "DMSans",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xFF1E1E2C)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Spacer(),
+                              Padding(padding: EdgeInsets.only(top: screenHeight * 0.01,bottom: screenHeight*0.01),
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => const ManageMemberPage()),
+                                  );
+                                },
+                                child: Container(
+                                  width: screenWidth * 0.1,
+                                  height: screenHeight * 0.05,
+                                  decoration: BoxDecoration(
+                                      color: const Color(0xFFF3F4F6),
+                                      borderRadius: BorderRadius.circular(10)),
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.edit,
+                                      color: Colors.black,
+                                      size: 16,
+                                    ),
+                                  ),
+                                ),
+                              ))
+                            ],
+                          ),
+                          Divider(
+                            color: Colors.grey[300],
+                            thickness: 1,
+                            height: screenHeight * 0.02,
+                          ),
+                          Padding(padding: EdgeInsets.only(top: screenHeight * 0.01),
+                            child: const Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Activo",
+                                  style: TextStyle(
+                                      fontFamily: "DMSans",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xFF1E1E2C)),
+                                ),
+                                Spacer(),
+                                Text("Disponible",
+                                  style: TextStyle(
+                                      fontFamily: "DMSans",
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xFF1E1E2C)),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: screenHeight * 0.02,),
+                    Container(
+                      padding: EdgeInsets.only(top: screenHeight * 0.02, bottom: screenHeight * 0.02, left: screenWidth * 0.03, right: screenWidth * 0.03),
+                      height: screenHeight * 0.17,
+                      width: screenWidth,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFFFFF),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF000000).withAlpha(50),
+                            spreadRadius: 1,
+                            blurRadius: 5,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ClipOval(
+                                child: Image.network(
+                                  "https://picsum.photos/200",
+                                  width: screenWidth * 0.15,
+                                  height: screenHeight * 0.07,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Padding(padding: EdgeInsets.only(left: screenWidth * 0.02, top: screenHeight * 0.01),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text("Deirdre Gallegos",
+                                      style: TextStyle(
+                                          fontFamily: "DMSans",
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: Color(0xFF1E1E2C)),
+                                    ),
+                                    SizedBox(height: screenHeight * 0.01,),
+                                    const Text("Agente de Campo",
+                                      style: TextStyle(
+                                          fontFamily: "DMSans",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xFF1E1E2C)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Spacer(),
+                              Padding(padding: EdgeInsets.only(top: screenHeight * 0.01,bottom: screenHeight*0.01),
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => const ManageMemberPage()),
+                                  );
+                                },
+                                child: Container(
+                                  width: screenWidth * 0.1,
+                                  height: screenHeight * 0.05,
+                                  decoration: BoxDecoration(
+                                      color: const Color(0xFFF3F4F6),
+                                      borderRadius: BorderRadius.circular(10)),
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.edit,
+                                      color: Colors.black,
+                                      size: 16,
+                                    ),
+                                  ),
+                                ),
+                              ))
+                            ],
+                          ),
+                          Divider(
+                            color: Colors.grey[300],
+                            thickness: 1,
+                            height: screenHeight * 0.02,
+                          ),
+                          Padding(padding: EdgeInsets.only(top: screenHeight * 0.01),
+                            child: const Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Activo",
+                                  style: TextStyle(
+                                      fontFamily: "DMSans",
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xFF1E1E2C)),
+                                ),
+                                Spacer(),
+                                Text("Disponible",
+                                  style: TextStyle(
+                                      fontFamily: "DMSans",
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color(0xFF1E1E2C)),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                        ],
+                      )
+                    )
+                  ),
+                // Expanded(child:_buildMemberList(screenWidth,screenHeight))
+              ],
+            ),
+          )
+        ),
     );
   }
 }

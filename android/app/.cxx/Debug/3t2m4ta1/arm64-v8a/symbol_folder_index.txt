@@ -1,0 +1,1 @@
+/home/stuko/College/Integrador/Scarlet/build/app/intermediates/cxx/Debug/3t2m4ta1/obj/arm64-v8a

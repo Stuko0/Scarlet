@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:scarlet_app/screens/teams/members_page.dart';
 
 class ManageMemberPage extends StatefulWidget {
   const ManageMemberPage({super.key});

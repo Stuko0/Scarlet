@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:scarlet_app/data/routes.dart';
-import 'package:scarlet_app/widgets/rtfires_notifications.dart';
+// import 'package:scarlet_app/widgets/rtfires_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 // final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 //     FlutterLocalNotificationsPlugin();
@@ -27,7 +27,7 @@ Future<void> main() async {
     for (var change in snapshot.docChanges) {
       if (change.type == DocumentChangeType.added ||
           change.type == DocumentChangeType.modified) {
-        showNotification();
+        // showNotification();
       }
     }
   });

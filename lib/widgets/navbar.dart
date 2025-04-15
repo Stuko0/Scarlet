@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scarlet_app/screens/maps/realtime_page.dart';
-import 'package:scarlet_app/screens/maps/pastfires_page.dart';
+import 'package:scarlet_app/screens/teams/forecast_page.dart';
 import 'package:scarlet_app/screens/teams/welcome_team_page.dart';
 import 'package:scarlet_app/screens/user/profile_page.dart';
 
@@ -34,7 +34,7 @@ class _NavBarState extends State<NavBar> {
         const RealTimePage(),
       ],
       [
-        const PastFiresPage(),
+        const ForecastPage(),
       ],
       [
         const WelcomeTeamPage(),
@@ -43,67 +43,63 @@ class _NavBarState extends State<NavBar> {
         const ProfilePage(),
       ],
     ];
-    return Scaffold(
-        backgroundColor: Colors.white,
-        body: children[_currentIndex][_subIndex],
-        bottomNavigationBar: Container(
-          decoration: const BoxDecoration(
-              border:
-                  Border(top: BorderSide(color: Color(0xffe4e4e4), width: 1))),
-          child: BottomNavigationBar(
-            backgroundColor: Colors.white,
-            currentIndex: _currentIndex,
-            onTap: (index) {
-              setState(() {
-                _currentIndex = index;
-                _subIndex = 0;
-              });
-            },
-            selectedItemColor: const Color(0XFFDF8946),
-            showUnselectedLabels: true,
-            enableFeedback: false,
-            unselectedItemColor: const Color(0XFFBEBEBE),
-            items: [
-              BottomNavigationBarItem(
-                icon: Image.asset('assets/img/icons/real-time-noselected.png',
-                    width: 24, height: 24),
-                label: 'Tiempo Real',
-                activeIcon: Image.asset(
-                    'assets/img/icons/selected-real-time.png',
-                    width: 24,
-                    height: 24),
-              ),
-              BottomNavigationBarItem(
-                icon: Image.asset(
-                    'assets/img/icons/fire-noselected.png',
-                    width: 24,
-                    height: 24),
-                label: 'Pronostico',
-                activeIcon: Image.asset(
-                    'assets/img/icons/fire-selected.png',
-                    width: 24,
-                    height: 24),
-              ),
-              BottomNavigationBarItem(
-                icon: Image.asset('assets/img/icons/people-noselected.png',
-                    width: 24, height: 24),
-                label: 'Equipos',
-                activeIcon: Image.asset(
-                    'assets/img/icons/people-selected.png',
-                    width: 24,
-                    height: 24),
-              ),
-              BottomNavigationBarItem(
-                icon: Image.asset('assets/img/icons/user-noselected.png',
-                    width: 24, height: 24),
-                label: 'Perfil',
-                activeIcon: Image.asset(
-                    'assets/img/icons/user-selected.png',
-                    width: 24,
-                    height: 24),
-              ),
-            ],
-          ),
-        ));
+    return Theme(data: Theme.of(context).copyWith(canvasColor: Colors.white),
+      child: Scaffold(
+      backgroundColor: Colors.white,
+      body: children[_currentIndex][_subIndex],
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          border:
+            Border(top: BorderSide(color: Color(0xffe4e4e4), width: 1)
+          )
+        ),
+        child: BottomNavigationBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index;
+              _subIndex = 0;
+            });
+          },
+          selectedItemColor: const Color(0XFFDF8946),
+          showUnselectedLabels: true,
+          enableFeedback: false,
+          unselectedItemColor: const Color(0XFF6a6a6a),
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.local_fire_department_outlined,
+                  color: Color(0XFF6a6a6a), size: 24),
+              label: 'Tiempo Real',
+              activeIcon: Icon(Icons.local_fire_department_outlined,
+                  color: Color(0XFFDF8946), size: 24),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_today_outlined,
+                  color: Color(0XFF6a6a6a), size: 24),
+              label: 'Pronostico',
+                activeIcon: Icon(Icons.calendar_today_outlined,
+                  color: Color(0XFFDF8946), size: 24),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.groups,
+                  color: Color(0XFF6a6a6a), size: 24),
+              label: 'Equipos',
+              activeIcon: Icon(Icons.groups,
+                  color: Color(0XFFDF8946), size: 24),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_pin_circle_outlined,
+                  color: Color(0XFF6a6a6a), size: 24),
+              label: 'Perfil',
+              activeIcon: Icon(Icons.person_pin_circle_outlined,
+                  color: Color(0XFFDF8946), size: 24),
+            ),
+          ],
+        ),
+      )
+      )
+    ) ;
   }
 }

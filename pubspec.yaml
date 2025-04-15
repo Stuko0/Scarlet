@@ -8,20 +8,22 @@ environment:
 
 dependencies:
   cloud_firestore: ^4.14.0
+  ffi: ^2.1.4
   firebase_core: ^2.24.2
   flutter:
     sdk: flutter
-  flutter_local_notifications: ^17.1.2
+  # flutter_local_notifications: ^17.1.2
   flutter_localizations:
     sdk: flutter
   geolocator: ^11.0.0
   google_maps_flutter: ^2.5.3
   http: ^1.1.0
-  intl: ^0.18.1
+  intl: ^0.19.0
   json_serializable: ^6.7.1
   permission_handler: ^11.0.1
   shared_preferences: ^2.2.3
-
+  win32: ^5.11.0
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

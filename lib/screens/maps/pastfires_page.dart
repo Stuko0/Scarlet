@@ -52,7 +52,7 @@ class _PastFiresPageState extends State<PastFiresPage> {
                             // TODO mandar a ubicacion
                           }else{Navigator.pop(context);}
                         },
-                        child: CustomModal(width: 327, height: screenHeight*0.5, picture: "https://picsum.photos/1920", images: ["https://picsum.photos/1920","https://picsum.photos/1920","https://picsum.photos/1920"], name: "Wildfire", address: "Alguna Parte", features: ["D: ${fire['acq_date']}","H: ${fire['acq_time']}","D/N: ${fire['daynight']}",], maxTeams: maxTeams, minTeams: minTeams, risky: risky,),
+                        child: CustomModal(width: 327, height: screenHeight*0.5, picture: "https://picsum.photos/1920", images: const ["https://picsum.photos/1920","https://picsum.photos/1920","https://picsum.photos/1920"], name: "Wildfire", address: "Alguna Parte", features: ["D: ${fire['acq_date']}","H: ${fire['acq_time']}","D/N: ${fire['daynight']}",], maxTeams: maxTeams, minTeams: minTeams, risky: risky,),
                       )
                     );
                   }

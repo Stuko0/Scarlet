@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  final String _apiUrl ="https://412bnmkw.brs.devtunnels.ms:8000/users"; //usar el link generado por devtunnels, DEBE PERMITIR ANONIMOS
+  final String _apiUrl ="https://0hl39814.brs.devtunnels.ms:8000/users"; //usar el link generado por devtunnels, DEBE PERMITIR ANONIMOS =B5VF'.?5x5*S#M || mahayo8987@dwriters.com
 
   Future<http.Response> getByEmail(String email) async {
     final response = await http.post(

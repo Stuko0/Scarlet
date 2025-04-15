@@ -314,9 +314,9 @@ class _LoginPageState extends State<LoginPage>
                       child: ElevatedButton(
                         style: ButtonStyle(
                           backgroundColor:
-                              const MaterialStatePropertyAll<Color>(
+                              const WidgetStatePropertyAll<Color>(
                                   Color(0xFFDF8946)),
-                          shape: MaterialStateProperty.all<OutlinedBorder>(
+                          shape: WidgetStateProperty.all<OutlinedBorder>(
                             RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(11.0),
                             ),
@@ -380,8 +380,7 @@ class _LoginPageState extends State<LoginPage>
                                             ),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.grey
-                                                    .withOpacity(0.5),
+                                                color: Colors.grey.withAlpha(50),
                                                 spreadRadius: 5,
                                                 blurRadius: 7,
                                                 offset: const Offset(0, 3),
@@ -451,7 +450,7 @@ class _LoginPageState extends State<LoginPage>
                                         ),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.grey.withOpacity(0.5),
+                                            color: Colors.grey.withAlpha(50),
                                             spreadRadius: 5,
                                             blurRadius: 7,
                                             offset: const Offset(0, 3),
