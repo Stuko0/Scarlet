@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:scarlet_app/data/user_services.dart';
 import 'package:scarlet_app/screens/authentication/login_page.dart';
 import 'package:scarlet_app/screens/user/edit_profile.dart';
+import 'package:scarlet_app/screens/user/notifications_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -380,23 +381,33 @@ class _ProfilePage extends State<ProfilePage> {
                             color: Color(0xFFe5e7eb),
                             thickness: 1,
                           ),
-                          const Padding(
-                            padding: EdgeInsets.only(left: 20, top:10, bottom: 10),
-                            child: Row(
-                              children: [
-                                Icon(Icons.notifications_none_rounded,
-                                    color: Color(0xff6B7280)),
-                                SizedBox(width: 12),
-                                Text(
-                                  "Notificaciones",
-                                  style: TextStyle(
-                                      fontFamily: "DMSans",
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black),
+                          InkWell(
+                            onTap: (){
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const NotificationsPage(),
                                 ),
-                              ],
-                            )
+                              );
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(left: 20, top:10, bottom: 10),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.notifications_none_rounded,
+                                      color: Color(0xff6B7280)),
+                                  SizedBox(width: 12),
+                                  Text(
+                                    "Notificaciones",
+                                    style: TextStyle(
+                                        fontFamily: "DMSans",
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black),
+                                  ),
+                                ],
+                              )
+                            ),
                           ),
                           const Divider(
                             color: Color(0xFFe5e7eb),

@@ -4,10 +4,12 @@ publish_to: 'none'
 version: 0.1.0
 
 environment:
-  sdk: '>=2.17.0 <4.0.0'
+  sdk: '>=3.3.0 <4.0.0'
 
 dependencies:
   cloud_firestore: ^4.14.0
+  connectrpc: ^0.3.0
+  protobuf: ^3.1.0
   ffi: ^2.1.4
   firebase_core: ^2.24.2
   flutter:
@@ -17,12 +19,14 @@ dependencies:
     sdk: flutter
   geolocator: ^11.0.0
   google_maps_flutter: ^2.5.3
-  http: ^1.1.0
-  intl: ^0.19.0
+  http: ^1.2.0
+  intl: ^0.20.2
   json_serializable: ^6.7.1
   permission_handler: ^11.0.1
   shared_preferences: ^2.2.3
   win32: ^5.11.0
+  grpc: ^4.0.4
+  fixnum: ^1.1.1
   
 dev_dependencies:
   flutter_test:

@@ -62,6 +62,8 @@ class _LoginPageState extends State<LoginPage>
   bool booleanLogin = true;
   bool booleanPassword = false;
   bool booleanNumber = false;
+  bool emailVerified = false;
+  bool isLoading = false;
   String texto = "Iniciar con número de teléfono";
   Image icono = const Image(
     height: 30,
@@ -88,6 +90,133 @@ class _LoginPageState extends State<LoginPage>
         },
       );
     });
+  }
+
+  Future<void> _verifyEmail() async {
+    if (emailController.text.isEmpty) return;
+
+    setState(() => isLoading = true);
+    
+    try {
+      final emailExists = await apiService.checkEmailExists(emailController.text);
+      
+      if (!emailExists) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RegisterPage(newEmail: emailController.text),
+          ),
+        );
+        return;
+      }
+
+      setState(() => emailVerified = true);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _login() async {
+    double screenWidth = MediaQuery.of(context).size.width;
+    setState(() => isLoading = true);
+    
+    try {
+      final response = await apiService.loginByEmail(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+
+      if (response == null || response['user'] == null) {
+        throw Exception('La respuesta del servidor es inválida');
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      final userData = response['user'] as Map<String, dynamic>;
+    
+      final userIdString = userData['userId']?.toString();
+      final userId = userIdString != null ? int.tryParse(userIdString) : null;
+      
+      if (userId == null || userId <= 0) {
+        throw Exception('ID de usuario no válido');
+      }
+
+      final token = response['token']?.toString();
+      if (token == null || token.isEmpty) {
+        throw Exception('No se recibió token de autenticación');
+      }
+
+      await prefs.setInt('id', userId);
+      await prefs.setString('token', token);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const NavBar(initialIndex: 2),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Container(
+            height: 80,
+            width: screenWidth * 0.7,
+            padding: const EdgeInsets.symmetric(
+                horizontal: 40, vertical: 20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius:
+                  BorderRadius.circular(10.0),
+              border: Border.all(
+                color: const Color(0xFFA20E0E),
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withAlpha(50),
+                  spreadRadius: 5,
+                  blurRadius: 7,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: const Row(
+              children: [
+                Icon(
+                  Icons.warning_amber_outlined,
+                  color: Color(0xFFA20E0E),
+                  size: 40,
+                ),
+                SizedBox(
+                  width: 20,
+                ),
+                Expanded(
+                    child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Error al iniciar sesión. Por favor, revisa tu contraseña.',
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight:
+                              FontWeight.w500,
+                          color:
+                              Color(0xFFA20E0E)),
+                    )
+                  ],
+                ))
+              ],
+            )),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ));
+    } finally {
+      setState(() => isLoading = false);
+    }
   }
 
   @override
@@ -293,7 +422,7 @@ class _LoginPageState extends State<LoginPage>
               Column(
                 children: [
                   Image.asset(
-                    "assets/img/logos/wildfire-logo.png",
+                    "assets/img/logos/app-logo.png",
                     width: 313,
                     height: 350,
                   ),
@@ -327,167 +456,101 @@ class _LoginPageState extends State<LoginPage>
                             if (numberController.text != "" &&
                                 numberController.text.length == 8) {
                               String number = "+591${numberController.text}";
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ConfirmNumber(
-                                    number: number,
-                                  ),
-                                ),
-                              );
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder: (context) => ConfirmNumber(
+                              //       number: number,
+                              //     ),
+                              //   ),
+                              // );
                             }
                           } else {
                             if (emailController.text != "") {
-                              var res = await apiService
-                                  .getByEmail(emailController.text);
-                              if (res.statusCode == 200) {
-                                booleanPassword = true;
-                                if (passwordController.text != "") {
-                                  var loginResult = await apiService.checkLogin(
-                                      emailController.text,
-                                      passwordController.text);
-                                  if (loginResult.statusCode == 200) {
-                                    final prefs = await _prefs;
-                                    if(loginResult.body.isNotEmpty) {
-                                      Map<String, dynamic> responseBody =
-                                        jsonDecode(loginResult.body);
-                                      await prefs.setInt(
-                                          'id', responseBody['id']);
-                                    }
+                              if (!emailVerified){
+                                setState(() => isLoading = true);
+                                try {
+                                  final emailExists = await apiService.checkEmailExists(emailController.text);
+                                  
+                                  if (!emailExists) {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => const NavBar(
-                                          initialIndex: 2,
-                                        ),
+                                        builder: (context) => RegisterPage(newEmail: emailController.text),
                                       ),
                                     );
-                                  } else {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(SnackBar(
-                                      content: Container(
-                                          height: 80,
-                                          width: screenWidth * 0.7,
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 40, vertical: 20),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius:
-                                                BorderRadius.circular(10.0),
-                                            border: Border.all(
-                                              color: const Color(0xFFA20E0E),
-                                              width: 1.0,
-                                            ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.grey.withAlpha(50),
-                                                spreadRadius: 5,
-                                                blurRadius: 7,
-                                                offset: const Offset(0, 3),
-                                              ),
-                                            ],
-                                          ),
-                                          child: const Row(
-                                            children: [
-                                              Icon(
-                                                Icons.warning_amber_outlined,
-                                                color: Color(0xFFA20E0E),
-                                                size: 40,
-                                              ),
-                                              SizedBox(
-                                                width: 20,
-                                              ),
-                                              Expanded(
-                                                  child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    'Error al iniciar sesión. Por favor, revisa tu contraseña.',
-                                                    style: TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        color:
-                                                            Color(0xFFA20E0E)),
-                                                  )
-                                                ],
-                                              ))
-                                            ],
-                                          )),
-                                      behavior: SnackBarBehavior.floating,
-                                      backgroundColor: Colors.transparent,
-                                      elevation: 0,
-                                    ));
+                                    return;
                                   }
+                                  
+                                  setState(() {
+                                    emailVerified = true;
+                                    booleanPassword = true; // Mostrar campo de contraseña
+                                  });
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Error: ${e.toString()}')),
+                                  );
+                                } finally {
+                                  setState(() => isLoading = false);
                                 }
-                              } else {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => RegisterPage(
-                                      newEmail: emailController.text,
-                                    ),
-                                  ),
-                                );
+                              } else if (booleanPassword && passwordController.text.isNotEmpty) {
+                                // Si ya verificamos el email y tenemos contraseña
+                                await _login(); // Llamar a tu función de login
                               }
                             } else {
-                              if (emailController.text != "") {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(
-                                  content: Container(
-                                      height: 80,
-                                      width: screenWidth * 0.7,
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 40, vertical: 20),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius:
-                                            BorderRadius.circular(10.0),
-                                        border: Border.all(
-                                          color: const Color(0xFFA20E0E),
-                                          width: 1.0,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.grey.withAlpha(50),
-                                            spreadRadius: 5,
-                                            blurRadius: 7,
-                                            offset: const Offset(0, 3),
-                                          ),
-                                        ],
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Container(
+                                    height: 80,
+                                    width: screenWidth * 0.7,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 40, vertical: 20),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius:
+                                          BorderRadius.circular(10.0),
+                                      border: Border.all(
+                                        color: const Color(0xFFA20E0E),
+                                        width: 1.0,
                                       ),
-                                      child: const Row(
-                                        children: [
-                                          Icon(
-                                            Icons.warning_amber_outlined,
-                                            color: Color(0xFFA20E0E),
-                                            size: 40,
-                                          ),
-                                          SizedBox(
-                                            width: 20,
-                                          ),
-                                          Expanded(
-                                              child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Ingrese su correo!.',
-                                                style: TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Color(0xFFA20E0E)),
-                                              )
-                                            ],
-                                          ))
-                                        ],
-                                      )),
-                                  behavior: SnackBarBehavior.floating,
-                                  backgroundColor: Colors.transparent,
-                                  elevation: 0,
-                                ));
-                              }
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withAlpha(50),
+                                          spreadRadius: 5,
+                                          blurRadius: 7,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Row(
+                                      children: [
+                                        Icon(
+                                          Icons.warning_amber_outlined,
+                                          color: Color(0xFFA20E0E),
+                                          size: 40,
+                                        ),
+                                        SizedBox(
+                                          width: 20,
+                                        ),
+                                        Expanded(
+                                            child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Ingrese su correo!.',
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Color(0xFFA20E0E)),
+                                            )
+                                          ],
+                                        ))
+                                      ],
+                                    )),
+                                behavior: SnackBarBehavior.floating,
+                                backgroundColor: Colors.transparent,
+                                elevation: 0,
+                              ));
                             }
                           }
                           await Future.delayed(

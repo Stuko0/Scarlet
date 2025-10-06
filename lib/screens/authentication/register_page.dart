@@ -752,21 +752,35 @@ class _RegisterPageState extends State<RegisterPage> {
                               child: Text(""),
                             );
                           });
-                          var result = await apiService.registerUser(
-                              nameController.text,
-                              lastNameController.text,
-                              emailController.text,
-                              passwordController.text);
-                          if (result.statusCode == 200) {
-                            final prefs = await _prefs;
-                            Map<String, dynamic> responseBody = jsonDecode(result.body);
-                            await prefs.setInt(
-                                'id', responseBody['id']);
-                            Navigator.push(
+                          try {
+                            final result = await apiService.createUserByEmail(
+                              name:  nameController.text,
+                              lastname:  lastNameController.text,
+                              email:  emailController.text,
+                              password:  passwordController.text);
+                            final prefs = await SharedPreferences.getInstance();
+                            if (result['user']?['userId'] != null) {
+                              final userId = int.tryParse(result['user']['userId'].toString()) ?? 0;
+                              if (userId > 0) {
+                                await prefs.setInt('id', userId);
+                              } else {
+                                throw Exception('ID de usuario no válido');
+                              }
+                            }
+                            
+                            if (result['token'] != null) {
+                              await prefs.setString('token', result['token']);
+                            }
+
+                            Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const NavBar(initialIndex: 2,),
+                                builder: (context) => const NavBar(initialIndex: 2),
                               ),
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(e.toString())),
                             );
                           }
                         }
