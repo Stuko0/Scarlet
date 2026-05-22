@@ -7,6 +7,7 @@ import 'package:scarlet_app/features/shell/presentation/shell_page.dart';
 import 'package:scarlet_app/features/incidents/presentation/map_page.dart';
 import 'package:scarlet_app/features/personnel/presentation/profile_page.dart';
 import 'package:scarlet_app/features/teams/presentation/teams_page.dart';
+import 'package:scarlet_app/features/inventory/presentation/pages/inventory_page.dart';
 
 /// GoRouter provider
 final routerProvider = Provider<GoRouter>((ref) {
@@ -57,6 +58,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/profile',
             pageBuilder: (context, state) => const NoTransitionPage(
               child: ProfilePage(),
+            ),
+          ),
+          GoRoute(
+            path: '/inventory',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: InventoryPage(),
             ),
           ),
         ],

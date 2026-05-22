@@ -11,8 +11,9 @@ class ShellPage extends StatelessWidget {
   int _currentIndex(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
     if (location.startsWith('/dashboard')) return 0;
-    if (location.startsWith('/teams')) return 1;
-    if (location.startsWith('/profile')) return 2;
+    if (location.startsWith('/inventory')) return 1;
+    if (location.startsWith('/teams')) return 2;
+    if (location.startsWith('/profile')) return 3;
     return 0;
   }
 
@@ -33,15 +34,19 @@ class ShellPage extends StatelessWidget {
           backgroundColor: Colors.white,
           elevation: 0,
           currentIndex: index,
+          type: BottomNavigationBarType.fixed,
           onTap: (i) {
             switch (i) {
               case 0:
                 context.go('/dashboard');
                 break;
               case 1:
-                context.go('/teams');
+                context.go('/inventory');
                 break;
               case 2:
+                context.go('/teams');
+                break;
+              case 3:
                 context.go('/profile');
                 break;
             }
@@ -56,6 +61,13 @@ class ShellPage extends StatelessWidget {
                   color: Color(0xFF6A6A6A), size: 24),
               label: 'Mapa',
               activeIcon: Icon(Icons.local_fire_department_outlined,
+                  color: Color(0xFFDF8946), size: 24),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.inventory_2_outlined,
+                  color: Color(0xFF6A6A6A), size: 24),
+              label: 'Recursos',
+              activeIcon: Icon(Icons.inventory_2_outlined,
                   color: Color(0xFFDF8946), size: 24),
             ),
             BottomNavigationBarItem(
