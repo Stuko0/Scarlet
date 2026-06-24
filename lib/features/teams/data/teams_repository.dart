@@ -29,4 +29,14 @@ class TeamsRepositoryImpl implements TeamsRepository {
         .map((u) => User.fromJson(u as Map<String, dynamic>))
         .toList();
   }
+
+  @override
+  Future<ActiveIncident?> getActiveIncident(int teamId) async {
+    try {
+      final response = await _dio.get('/api/v1/teams/$teamId/active-incident');
+      return ActiveIncident.fromJson(response.data as Map<String, dynamic>);
+    } on DioException {
+      return null;
+    }
+  }
 }

@@ -3,14 +3,17 @@ import 'package:scarlet_app/features/auth/domain/user_entity.dart';
 import 'package:scarlet_app/features/auth/presentation/providers/auth_controller.dart';
 import 'package:scarlet_app/features/teams/data/teams_repository.dart';
 import 'package:scarlet_app/features/teams/domain/team_entity.dart';
+import 'package:scarlet_app/features/teams/domain/teams_repository.dart';
 
 class TeamState {
   final Team team;
   final List<User> members;
+  final ActiveIncident? activeIncident;
 
   const TeamState({
     required this.team,
     required this.members,
+    this.activeIncident,
   });
 }
 
@@ -31,10 +34,12 @@ class TeamController extends AsyncNotifier<TeamState?> {
     final results = await Future.wait([
       repo.getTeam(teamId),
       repo.getTeamMembers(teamId),
+      repo.getActiveIncident(teamId),
     ]);
 
     final team = results[0] as Team;
     final members = results[1] as List<User>;
+    final activeIncident = results[2] as ActiveIncident?;
 
     members.sort((a, b) {
       final roleOrder = {'COMMANDER': 0, 'MEMBER': 1, 'CIVILIAN': 2};
@@ -44,7 +49,7 @@ class TeamController extends AsyncNotifier<TeamState?> {
       return a.fullName.compareTo(b.fullName);
     });
 
-    return TeamState(team: team, members: members);
+    return TeamState(team: team, members: members, activeIncident: activeIncident);
   }
 
   Future<void> refresh() async {

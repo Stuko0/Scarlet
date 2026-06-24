@@ -25,11 +25,12 @@ class AuthController extends AsyncNotifier<User?> {
       }
     }
 
-    final userId = await storage.getUserId();
-    if (userId != null) {
-      return User(id: userId, fullName: '', email: '');
+    final repo = ref.read(authRepositoryProvider);
+    try {
+      return await repo.getCurrentUser();
+    } catch (_) {
+      return null;
     }
-    return null;
   }
 
   Future<void> login(String email, String password) async {

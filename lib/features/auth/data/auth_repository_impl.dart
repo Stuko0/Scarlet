@@ -68,4 +68,18 @@ class AuthRepositoryImpl implements AuthRepository {
     final token = await _storage.getToken();
     return token != null && token.isNotEmpty;
   }
+
+  @override
+  Future<User> getCurrentUser() async {
+    try {
+      final response = await _dio.get('/api/v1/users/me');
+      return User.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final msg = e.response?.data?['message'] ?? 'Error al obtener perfil';
+        throw Exception(msg);
+      }
+      throw Exception('Error de conexión: ${e.message}');
+    }
+  }
 }

@@ -16,7 +16,7 @@ class TileKey {
     final lonAbs = west.abs().toStringAsFixed(1);
     final latPrefix = south >= 0 ? 'n' : 's';
     final lonPrefix = west >= 0 ? 'e' : 'w';
-    return '$latPrefix$latAbs$lonPrefix$lonAbs.db';
+    return '${latPrefix}${latAbs}_${lonPrefix}${lonAbs}.db';
   }
 
   List<TileKey> neighbors() {

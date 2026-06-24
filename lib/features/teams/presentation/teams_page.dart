@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:scarlet_app/features/auth/domain/user_entity.dart';
 import 'package:scarlet_app/features/auth/presentation/providers/auth_controller.dart';
+import 'package:scarlet_app/features/team_safety/presentation/providers/team_safety_controller.dart';
 import 'providers/teams_controller.dart';
 
 class TeamsPage extends ConsumerWidget {
@@ -90,6 +92,50 @@ class TeamsPage extends ConsumerWidget {
                       .where((m) => m.dutyStatus == 'on-duty')
                       .length,
                 ),
+                if (team.activeIncident != null && team.activeIncident!.active) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE74C3C).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFFE74C3C).withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.warning, color: Color(0xFFE74C3C), size: 24),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Text(
+                            'Incidencia activa asignada',
+                            style: TextStyle(
+                              color: Color(0xFFE74C3C),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'DM Sans',
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            final user = ref.read(authControllerProvider).valueOrNull;
+                            if (user != null) {
+                              ref.read(teamSafetyControllerProvider.notifier).joinIncident(
+                                '${user.teamId ?? 0}',
+                                '${user.id}',
+                                user.fullName,
+                              );
+                              context.go('/team-safety');
+                            }
+                          },
+                          child: const Text('Ver equipo'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 20),
 
                 // Section title
