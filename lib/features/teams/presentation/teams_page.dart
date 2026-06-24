@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scarlet_app/features/auth/domain/user_entity.dart';
-import 'package:scarlet_app/features/auth/presentation/auth_controller.dart';
-import 'teams_controller.dart';
+import 'package:scarlet_app/features/auth/presentation/providers/auth_controller.dart';
+import 'providers/teams_controller.dart';
 
 class TeamsPage extends ConsumerWidget {
   const TeamsPage({super.key});
@@ -83,8 +83,8 @@ class TeamsPage extends ConsumerWidget {
               children: [
                 // Team header card
                 _TeamHeaderCard(
-                  teamName: team.teamName,
-                  isActive: team.isActive,
+                  teamName: team.team.name,
+                  isActive: team.team.isActive,
                   memberCount: team.members.length,
                   onDutyCount: team.members
                       .where((m) => m.dutyStatus == 'on-duty')

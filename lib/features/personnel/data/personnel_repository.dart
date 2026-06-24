@@ -1,18 +1,18 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scarlet_app/core/network/dio_client.dart';
+import 'package:scarlet_app/features/personnel/domain/personnel_repository.dart';
 
-/// Provider for personnel repository
 final personnelRepositoryProvider = Provider<PersonnelRepository>((ref) {
-  return PersonnelRepository(dio: ref.watch(dioProvider));
+  return PersonnelRepositoryImpl(dio: ref.watch(dioProvider));
 });
 
-class PersonnelRepository {
+class PersonnelRepositoryImpl implements PersonnelRepository {
   final Dio _dio;
 
-  PersonnelRepository({required Dio dio}) : _dio = dio;
+  PersonnelRepositoryImpl({required Dio dio}) : _dio = dio;
 
-  /// Update duty status for a user
+  @override
   Future<void> updateDutyStatus(int userId, String status) async {
     await _dio.patch(
       '/api/v1/users/$userId/status',
@@ -20,7 +20,7 @@ class PersonnelRepository {
     );
   }
 
-  /// Report GPS location
+  @override
   Future<void> reportLocation({
     required int userId,
     required double latitude,
@@ -36,21 +36,5 @@ class PersonnelRepository {
         'timestamp_ms': timestampMs,
       },
     );
-  }
-
-  /// Get team members
-  Future<List<Map<String, dynamic>>> getTeamMembers(int teamId) async {
-    final response = await _dio.get('/api/v1/teams/$teamId/users');
-    final data = response.data;
-    if (data is Map && data.containsKey('users')) {
-      return List<Map<String, dynamic>>.from(data['users']);
-    }
-    return [];
-  }
-
-  /// Get team info
-  Future<Map<String, dynamic>> getTeam(int teamId) async {
-    final response = await _dio.get('/api/v1/teams/$teamId');
-    return response.data as Map<String, dynamic>;
   }
 }

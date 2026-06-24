@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../controllers/inventory_controller.dart';
+import '../providers/inventory_controller.dart';
 import '../../domain/asset_entity.dart';
 
 class InventoryPage extends ConsumerWidget {
@@ -129,7 +129,7 @@ class _AssetCard extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.between,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       asset.callsign,
@@ -143,9 +143,9 @@ class _AssetCard extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: _getStatusColor(asset.status).withOpacity(0.15),
+                        color: _getStatusColor(asset.status).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: _getStatusColor(asset.status).withOpacity(0.5)),
+                        border: Border.all(color: _getStatusColor(asset.status).withValues(alpha: 0.5)),
                       ),
                       child: Text(
                         asset.status.toUpperCase(),
@@ -300,7 +300,7 @@ class _StatusButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          border: Border.all(color: color.withOpacity(0.5)),
+          border: Border.all(color: color.withValues(alpha: 0.5)),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(

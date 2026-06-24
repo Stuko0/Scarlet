@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scarlet_app/features/personnel/presentation/duty_status_controller.dart';
-import 'package:scarlet_app/features/auth/presentation/auth_controller.dart';
+import 'package:scarlet_app/features/personnel/presentation/providers/duty_status_controller.dart';
+import 'package:scarlet_app/features/auth/presentation/providers/auth_controller.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});

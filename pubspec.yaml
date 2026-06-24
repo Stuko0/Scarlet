@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 0.2.0
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'
+  sdk: '>=3.12.2 <4.0.0'
 
 dependencies:
   flutter:
@@ -49,3 +49,4 @@ flutter:
     - assets/img/logos/
     - assets/img/icons/
     - .env
+    - assets/graphs/
