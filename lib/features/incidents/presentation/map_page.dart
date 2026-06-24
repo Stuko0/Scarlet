@@ -10,6 +10,9 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../data/incidents_repository_impl.dart';
 import '../domain/fire_entity.dart';
+import '../../routing/presentation/providers/route_controller.dart';
+import '../../routing/domain/route_entity.dart';
+import '../../routing/data/route_repository_impl.dart';
 
 /// Mapbox access token
 final String _mapboxToken = dotenv.env['MAPBOX_TOKEN'] ?? '';
@@ -27,10 +30,11 @@ class MapPage extends ConsumerStatefulWidget {
 
 class _MapPageState extends ConsumerState<MapPage> {
   final MapController _mapController = MapController();
-  LatLng _currentLocation = const LatLng(-17.413977, -66.165321); // Cochabamba
+  LatLng _currentLocation = const LatLng(-17.413977, -66.165321);
   List<Fire> _fires = [];
   bool _isLoading = false;
   Timer? _refreshTimer;
+  LatLng? _activeRouteDestination;
 
   @override
   void initState() {
@@ -56,14 +60,20 @@ class _MapPageState extends ConsumerState<MapPage> {
         final position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high,
         );
+        final newLocation = LatLng(position.latitude, position.longitude);
         setState(() {
-          _currentLocation = LatLng(position.latitude, position.longitude);
+          _currentLocation = newLocation;
         });
         _mapController.move(_currentLocation, 10);
+        _bootstrapTiles(newLocation);
       } catch (e) {
         debugPrint('Error getting location: $e');
       }
     }
+  }
+
+  void _bootstrapTiles(LatLng location) {
+    ref.read(routeRepositoryProvider).ensureInitialTiles(location);
   }
 
   Future<void> _loadFires() async {
@@ -202,6 +212,30 @@ class _MapPageState extends ConsumerState<MapPage> {
               ),
             ],
             const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.navigation, size: 18),
+                label: const Text('Ir'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFDF8946),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  final destination = LatLng(fire.latitude, fire.longitude);
+                  ref.read(routeControllerProvider(destination).notifier)
+                      .calculateRoute(_currentLocation);
+                  setState(() {
+                    _activeRouteDestination = destination;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -283,6 +317,30 @@ class _MapPageState extends ConsumerState<MapPage> {
                   ),
                 ],
               ),
+
+              // Active route polyline
+              if (_activeRouteDestination != null)
+                Consumer(
+                  builder: (context, ref, _) {
+                    final routeAsync =
+                        ref.watch(routeControllerProvider(_activeRouteDestination!));
+                    return routeAsync.whenOrNull(
+                          data: (route) {
+                            if (route == null) return const SizedBox.shrink();
+                            return PolylineLayer(
+                              polylines: [
+                                Polyline(
+                                  points: route.points,
+                                  color: const Color(0xFFDF8946),
+                                  strokeWidth: 4,
+                                ),
+                              ],
+                            );
+                          },
+                        ) ??
+                        const SizedBox.shrink();
+                  },
+                ),
             ],
           ),
 
@@ -324,6 +382,30 @@ class _MapPageState extends ConsumerState<MapPage> {
               ),
             ),
           ),
+
+          if (_activeRouteDestination != null)
+            Consumer(
+              builder: (context, ref, _) {
+                final routeAsync =
+                    ref.watch(routeControllerProvider(_activeRouteDestination!));
+                routeAsync.whenOrNull(
+                  error: (e, _) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error de ruta: $e'),
+                            backgroundColor: Colors.red.shade800,
+                          ),
+                        );
+                      }
+                    });
+                    return null;
+                  },
+                );
+                return const SizedBox.shrink();
+              },
+            ),
         ],
       ),
 
