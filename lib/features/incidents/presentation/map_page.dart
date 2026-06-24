@@ -5,14 +5,17 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../data/incidents_repository_impl.dart';
 import '../domain/fire_entity.dart';
+import '../../auth/presentation/providers/auth_controller.dart';
 import '../../routing/presentation/providers/route_controller.dart';
 import '../../routing/domain/route_entity.dart';
 import '../../routing/data/route_repository_impl.dart';
+import '../../team_safety/presentation/providers/team_safety_controller.dart';
 
 /// Mapbox access token
 final String _mapboxToken = dotenv.env['MAPBOX_TOKEN'] ?? '';
@@ -233,6 +236,37 @@ class _MapPageState extends ConsumerState<MapPage> {
                     _activeRouteDestination = destination;
                   });
                   Navigator.pop(context);
+                },
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.shield_outlined, size: 18),
+                label: const Text('Unirse a incidencia'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFFDF8946),
+                  side: const BorderSide(color: Color(0xFFDF8946)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  final authState = ref.read(authControllerProvider);
+                  final user = authState.valueOrNull;
+                  if (user != null) {
+                    ref.read(teamSafetyControllerProvider.notifier).joinIncident(
+                          '${user.teamId ?? 0}',
+                          '${user.id}',
+                          user.fullName,
+                        );
+                    if (context.mounted) {
+                      context.go('/team-safety');
+                    }
+                  }
                 },
               ),
             ),
