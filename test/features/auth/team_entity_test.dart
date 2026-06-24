@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:scarlet_app/features/teams/domain/team_entity.dart';
 import 'package:scarlet_app/features/teams/domain/teams_repository.dart';
-import 'package:scarlet_app/features/auth/domain/user_entity.dart';
 
 void main() {
   group('Team', () {

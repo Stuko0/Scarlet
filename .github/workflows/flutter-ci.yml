@@ -26,6 +26,7 @@ jobs:
         with:
           channel: stable
           cache: true
+      - run: cp .env.example .env
       - run: flutter pub get
       - run: flutter test
 
@@ -37,5 +38,6 @@ jobs:
         with:
           channel: stable
           cache: true
+      - run: cp .env.example .env
       - run: flutter pub get
       - run: flutter build apk --debug
