@@ -6,10 +6,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/services/home_widget_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+
+  final homeWidgetService = HomeWidgetService();
+  await homeWidgetService.init();
 
   // Lock to portrait mode
   SystemChrome.setPreferredOrientations([

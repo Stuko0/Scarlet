@@ -2,24 +2,25 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scarlet_app/core/network/dio_client.dart';
 import 'package:scarlet_app/features/auth/domain/user_entity.dart';
+import 'package:scarlet_app/features/teams/domain/teams_repository.dart';
+import 'package:scarlet_app/features/teams/domain/team_entity.dart';
 
-/// Provider for teams repository
 final teamsRepositoryProvider = Provider<TeamsRepository>((ref) {
-  return TeamsRepository(dio: ref.watch(dioProvider));
+  return TeamsRepositoryImpl(dio: ref.watch(dioProvider));
 });
 
-class TeamsRepository {
+class TeamsRepositoryImpl implements TeamsRepository {
   final Dio _dio;
 
-  TeamsRepository({required Dio dio}) : _dio = dio;
+  TeamsRepositoryImpl({required Dio dio}) : _dio = dio;
 
-  /// Get team info by ID
-  Future<Map<String, dynamic>> getTeam(int teamId) async {
+  @override
+  Future<Team> getTeam(int teamId) async {
     final response = await _dio.get('/api/v1/teams/$teamId');
-    return response.data as Map<String, dynamic>;
+    return Team.fromJson(response.data as Map<String, dynamic>);
   }
 
-  /// Get all members of a team
+  @override
   Future<List<User>> getTeamMembers(int teamId) async {
     final response = await _dio.get('/api/v1/teams/$teamId/users');
     final data = response.data as Map<String, dynamic>;
@@ -27,5 +28,15 @@ class TeamsRepository {
     return usersJson
         .map((u) => User.fromJson(u as Map<String, dynamic>))
         .toList();
+  }
+
+  @override
+  Future<ActiveIncident?> getActiveIncident(int teamId) async {
+    try {
+      final response = await _dio.get('/api/v1/teams/$teamId/active-incident');
+      return ActiveIncident.fromJson(response.data as Map<String, dynamic>);
+    } on DioException {
+      return null;
+    }
   }
 }

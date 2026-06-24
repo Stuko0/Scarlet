@@ -1,15 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scarlet_app/features/personnel/data/personnel_repository.dart';
 import 'package:scarlet_app/core/storage/secure_storage.dart';
+import 'package:scarlet_app/core/services/home_widget_service.dart';
 
-/// Duty status state
 final dutyStatusProvider = AsyncNotifierProvider<DutyStatusController, String>(
     () => DutyStatusController());
 
 class DutyStatusController extends AsyncNotifier<String> {
   @override
   Future<String> build() async {
-    // Default to off-duty; actual status would be fetched from user profile
     return 'off-duty';
   }
 
@@ -25,6 +24,10 @@ class DutyStatusController extends AsyncNotifier<String> {
       if (userId == null) throw Exception('No user ID found');
 
       await repo.updateDutyStatus(userId, newStatus);
+
+      final widgetService = ref.read(homeWidgetServiceProvider);
+      await widgetService.updateDutyStatus(newStatus);
+
       return newStatus;
     });
   }

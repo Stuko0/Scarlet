@@ -1,26 +1,36 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scarlet_app/features/auth/domain/user_entity.dart';
 import 'package:scarlet_app/features/auth/data/auth_repository_impl.dart';
+import 'package:scarlet_app/features/auth/data/biometric_auth_service.dart';
+import 'package:scarlet_app/features/auth/data/biometric_auth_provider.dart';
 import 'package:scarlet_app/core/storage/secure_storage.dart';
 
-/// Auth state — holds the current user (null if not logged in)
 final authControllerProvider =
     AsyncNotifierProvider<AuthController, User?>(() => AuthController());
 
 class AuthController extends AsyncNotifier<User?> {
   @override
   Future<User?> build() async {
-    // On app start, check if we have a valid token
     final storage = ref.read(secureStorageProvider);
     final token = await storage.getToken();
-    if (token != null && token.isNotEmpty) {
-      // We have a token — user is "logged in"
-      final userId = await storage.getUserId();
-      if (userId != null) {
-        return User(id: userId, fullName: '', email: '');
+    if (token == null || token.isEmpty) return null;
+
+    final biometricEnabled = await storage.isBiometricEnabled();
+    if (biometricEnabled) {
+      final biometricService = ref.read(biometricAuthServiceProvider);
+      final canAuth = await biometricService.canAuthenticate();
+      if (canAuth) {
+        final authenticated = await biometricService.authenticate();
+        if (!authenticated) return null;
       }
     }
-    return null;
+
+    final repo = ref.read(authRepositoryProvider);
+    try {
+      return await repo.getCurrentUser();
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<void> login(String email, String password) async {

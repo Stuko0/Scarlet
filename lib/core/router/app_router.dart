@@ -1,13 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:scarlet_app/features/auth/presentation/auth_controller.dart';
+import 'package:scarlet_app/features/auth/presentation/providers/auth_controller.dart';
 import 'package:scarlet_app/features/auth/presentation/login_page.dart';
 import 'package:scarlet_app/features/shell/presentation/shell_page.dart';
 import 'package:scarlet_app/features/incidents/presentation/map_page.dart';
 import 'package:scarlet_app/features/personnel/presentation/profile_page.dart';
 import 'package:scarlet_app/features/teams/presentation/teams_page.dart';
 import 'package:scarlet_app/features/inventory/presentation/pages/inventory_page.dart';
+import 'package:scarlet_app/features/team_safety/presentation/pages/team_safety_page.dart';
 
 /// GoRouter provider
 final routerProvider = Provider<GoRouter>((ref) {
@@ -64,6 +65,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/inventory',
             pageBuilder: (context, state) => const NoTransitionPage(
               child: InventoryPage(),
+            ),
+          ),
+          GoRoute(
+            path: '/team-safety',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: TeamSafetyPage(),
             ),
           ),
         ],

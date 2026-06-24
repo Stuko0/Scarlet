@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scarlet_app/features/personnel/presentation/duty_status_controller.dart';
-import 'package:scarlet_app/features/auth/presentation/auth_controller.dart';
+import 'package:scarlet_app/features/personnel/presentation/providers/duty_status_controller.dart';
+import 'package:scarlet_app/features/auth/presentation/providers/auth_controller.dart';
+import 'package:scarlet_app/features/auth/data/biometric_auth_service.dart';
+import 'package:scarlet_app/features/auth/data/biometric_auth_provider.dart';
+import 'package:scarlet_app/core/storage/secure_storage.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -165,6 +168,10 @@ class ProfilePage extends ConsumerWidget {
           _buildInfoTile(Icons.badge_outlined, 'Experiencia',
               '${user?.yearsExperience ?? 0} años'),
 
+          const SizedBox(height: 24),
+
+          _BiometricToggle(),
+
           const SizedBox(height: 32),
 
           // Logout button
@@ -236,6 +243,100 @@ class ProfilePage extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _BiometricToggle extends ConsumerStatefulWidget {
+  const _BiometricToggle();
+
+  @override
+  ConsumerState<_BiometricToggle> createState() => _BiometricToggleState();
+}
+
+class _BiometricToggleState extends ConsumerState<_BiometricToggle> {
+  bool _isAvailable = false;
+  bool _isEnabled = false;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAvailability();
+  }
+
+  Future<void> _checkAvailability() async {
+    final biometricService = ref.read(biometricAuthServiceProvider);
+    final storage = ref.read(secureStorageProvider);
+
+    final available = await biometricService.canAuthenticate();
+    final enabled = await storage.isBiometricEnabled();
+
+    if (mounted) {
+      setState(() {
+        _isAvailable = available;
+        _isEnabled = enabled;
+        _loaded = true;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_loaded) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE4E4E4)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.fingerprint, color: Color(0xFFDF8946), size: 24),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Desbloqueo biométrico',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'DM Sans',
+                    color: Color(0xFF2D2D2D),
+                  ),
+                ),
+                Text(
+                  _isAvailable
+                      ? 'Inicia sesión con tu huella o rostro'
+                      : 'No disponible en este dispositivo',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: _isAvailable
+                        ? const Color(0xFF656565)
+                        : Colors.grey.shade400,
+                    fontFamily: 'DM Sans',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: _isEnabled,
+            activeColor: const Color(0xFFDF8946),
+            onChanged: _isAvailable
+                ? (value) async {
+                    final storage = ref.read(secureStorageProvider);
+                    await storage.setBiometricEnabled(value);
+                    setState(() => _isEnabled = value);
+                  }
+                : null,
+          ),
+        ],
       ),
     );
   }

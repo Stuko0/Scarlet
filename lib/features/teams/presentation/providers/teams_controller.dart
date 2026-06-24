@@ -1,22 +1,22 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scarlet_app/features/auth/domain/user_entity.dart';
-import 'package:scarlet_app/features/auth/presentation/auth_controller.dart';
+import 'package:scarlet_app/features/auth/presentation/providers/auth_controller.dart';
 import 'package:scarlet_app/features/teams/data/teams_repository.dart';
+import 'package:scarlet_app/features/teams/domain/team_entity.dart';
+import 'package:scarlet_app/features/teams/domain/teams_repository.dart';
 
-/// Team data state
 class TeamState {
-  final String teamName;
-  final bool isActive;
+  final Team team;
   final List<User> members;
+  final ActiveIncident? activeIncident;
 
   const TeamState({
-    required this.teamName,
-    required this.isActive,
+    required this.team,
     required this.members,
+    this.activeIncident,
   });
 }
 
-/// Provider that loads the current user's team
 final teamControllerProvider =
     AsyncNotifierProvider<TeamController, TeamState?>(() => TeamController());
 
@@ -31,16 +31,16 @@ class TeamController extends AsyncNotifier<TeamState?> {
   Future<TeamState?> _loadTeam(int teamId) async {
     final repo = ref.read(teamsRepositoryProvider);
 
-    // Fetch team info and members in parallel
     final results = await Future.wait([
       repo.getTeam(teamId),
       repo.getTeamMembers(teamId),
+      repo.getActiveIncident(teamId),
     ]);
 
-    final teamData = results[0] as Map<String, dynamic>;
+    final team = results[0] as Team;
     final members = results[1] as List<User>;
+    final activeIncident = results[2] as ActiveIncident?;
 
-    // Sort: commanders first, then by name
     members.sort((a, b) {
       final roleOrder = {'COMMANDER': 0, 'MEMBER': 1, 'CIVILIAN': 2};
       final aOrder = roleOrder[a.role] ?? 3;
@@ -49,15 +49,7 @@ class TeamController extends AsyncNotifier<TeamState?> {
       return a.fullName.compareTo(b.fullName);
     });
 
-    return TeamState(
-      teamName: teamData['name'] as String? ??
-          teamData['teamName'] as String? ??
-          'Equipo',
-      isActive: teamData['is_active'] as bool? ??
-          teamData['isActive'] as bool? ??
-          true,
-      members: members,
-    );
+    return TeamState(team: team, members: members, activeIncident: activeIncident);
   }
 
   Future<void> refresh() async {

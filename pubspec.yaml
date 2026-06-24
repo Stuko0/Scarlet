@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 0.2.0
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'
+  sdk: '>=3.12.2 <4.0.0'
 
 dependencies:
   flutter:
@@ -32,10 +32,25 @@ dependencies:
   geolocator: ^11.0.0
   permission_handler: ^11.0.1
 
+  # Routing
+  sqflite: ^2.4.0
+  path_provider: ^2.1.0
+  path: ^1.9.0
+
+  # P2P & Safety
+  sensors_plus: ^7.0.0
+  nearby_connections: ^4.3.0
+  audioplayers: ^6.0.0
+
+  # Biometric
+  local_auth: ^2.3.0
+  local_auth_android: ^1.0.34
+
   # Utilities
   intl: ^0.20.2
   dio_http2_adapter: ^2.6.0
   flutter_dotenv: ^5.1.0
+  home_widget: ^0.9.3
 
 dev_dependencies:
   flutter_test:
@@ -49,3 +64,4 @@ flutter:
     - assets/img/logos/
     - assets/img/icons/
     - .env
+    - assets/graphs/

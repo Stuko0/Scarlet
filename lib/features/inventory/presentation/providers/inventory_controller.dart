@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../domain/asset_entity.dart';
-import '../data/inventory_repository_impl.dart';
+import '../../domain/asset_entity.dart';
+import '../../data/inventory_repository_impl.dart';
 
 final inventoryListProvider = FutureProvider.autoDispose<List<Asset>>((ref) async {
   final repo = ref.watch(inventoryRepositoryProvider);
