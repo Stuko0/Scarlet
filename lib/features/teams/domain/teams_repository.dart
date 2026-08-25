@@ -10,13 +10,22 @@ abstract class TeamsRepository {
 class ActiveIncident {
   final bool active;
   final String? incidentId;
+  final String? assignedAt;
+  final int? assignedBy;
 
-  const ActiveIncident({required this.active, this.incidentId});
+  const ActiveIncident({
+    required this.active,
+    this.incidentId,
+    this.assignedAt,
+    this.assignedBy,
+  });
 
   factory ActiveIncident.fromJson(Map<String, dynamic> json) {
     return ActiveIncident(
       active: json['active'] as bool? ?? false,
       incidentId: json['incident_id'] as String?,
+      assignedAt: json['assigned_at'] as String?,
+      assignedBy: (json['assigned_by'] as num?)?.toInt(),
     );
   }
 }
