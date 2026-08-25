@@ -47,4 +47,10 @@ class MotionDetector {
     _positionSub?.cancel();
     _accelSub?.cancel();
   }
+
+  /// Marca actividad manual (respuesta del usuario al self-check),
+  /// reiniciando la ventana de "quieto".
+  void acknowledgeActivity() {
+    _lastMovementAt = DateTime.now();
+  }
 }

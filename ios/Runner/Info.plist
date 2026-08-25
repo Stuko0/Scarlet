@@ -51,6 +51,12 @@
 	<string>Scarlet necesita ubicación en segundo plano para monitorear la seguridad del equipo durante una incidencia.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Scarlet usa Bluetooth para conectar dispositivos del equipo sin internet.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Scarlet usa la red local para compartir tu estado de seguridad con el equipo durante una incidencia.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_google-nearby._tcp</string>
+	</array>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Scarlet usa Face ID para desbloquear la sesión de forma segura.</string>
 </dict>

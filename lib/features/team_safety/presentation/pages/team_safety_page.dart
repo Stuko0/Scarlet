@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:scarlet_app/features/auth/presentation/providers/auth_controller.dart';
 import 'package:scarlet_app/features/team_safety/domain/team_member_status.dart';
 import 'package:scarlet_app/features/team_safety/presentation/providers/team_safety_controller.dart';
+import 'package:scarlet_app/features/team_safety/presentation/widgets/danger_self_check_modal.dart';
+import 'package:scarlet_app/features/team_safety/presentation/widgets/team_alarm.dart';
 
 class TeamSafetyPage extends ConsumerWidget {
   const TeamSafetyPage({super.key});
@@ -10,6 +13,13 @@ class TeamSafetyPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final statusesAsync = ref.watch(teamSafetyControllerProvider);
     final isActive = ref.watch(activeIncidentProvider);
+
+    // Watchdog UI: cuando el controller marca quieto >5 min sin responder,
+    // abre el self-check una sola vez por episodio.
+    ref.listen<bool>(selfCheckRequiredProvider, (previous, required) {
+      if (!required || previous == true) return;
+      _showSelfCheck(context, ref);
+    });
 
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
@@ -31,6 +41,7 @@ class TeamSafetyPage extends ConsumerWidget {
               icon: const Icon(Icons.exit_to_app, color: Colors.red),
               label: const Text('Salir', style: TextStyle(color: Colors.red)),
               onPressed: () {
+                TeamAlarm().stop();
                 ref.read(teamSafetyControllerProvider.notifier).leaveIncident();
                 if (context.mounted) Navigator.pop(context);
               },
@@ -82,6 +93,29 @@ class TeamSafetyPage extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  Future<void> _showSelfCheck(BuildContext context, WidgetRef ref) async {
+    final user = ref.read(authControllerProvider).valueOrNull;
+    final name = user?.fullName ?? 'Bombero';
+
+    // Alarma local mientras el modal está abierto.
+    TeamAlarm().start();
+
+    MemberStatus? result;
+    if (context.mounted) {
+      result = await showDialog<MemberStatus>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => DangerSelfCheckModal(firefighterName: name),
+      );
+    }
+    TeamAlarm().stop();
+
+    // null = timeout del modal (30s) → PELIGRO. ok = usuario respondió.
+    ref
+        .read(teamSafetyControllerProvider.notifier)
+        .resolveSelfCheck(isOk: result == MemberStatus.ok);
   }
 }
 

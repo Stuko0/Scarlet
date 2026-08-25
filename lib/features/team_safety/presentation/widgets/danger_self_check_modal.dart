@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:scarlet_app/features/team_safety/domain/team_member_status.dart';
-import 'team_alarm.dart';
 
 class DangerSelfCheckModal extends StatefulWidget {
   final String firefighterName;
@@ -15,7 +14,6 @@ class DangerSelfCheckModal extends StatefulWidget {
 class _DangerSelfCheckModalState extends State<DangerSelfCheckModal> {
   int _secondsLeft = 30;
   Timer? _timer;
-  bool _responded = false;
 
   @override
   void initState() {
@@ -75,7 +73,6 @@ class _DangerSelfCheckModalState extends State<DangerSelfCheckModal> {
         actions: [
           TextButton(
             onPressed: () {
-              _responded = true;
               _timer?.cancel();
               Navigator.pop(context, MemberStatus.ok);
             },

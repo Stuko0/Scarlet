@@ -19,7 +19,7 @@ class TeamAlarm {
       HapticFeedback.heavyImpact();
     });
 
-    _player.play(AssetSource('audio/alarm.mp3'));
+    _player.play(AssetSource('audio/alarm.wav'));
   }
 
   void stop() {

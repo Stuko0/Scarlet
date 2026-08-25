@@ -16,20 +16,21 @@ final teamSafetyRepositoryProvider = Provider<TeamSafetyRepository>((ref) {
 class TeamSafetyRepositoryImpl implements TeamSafetyRepository {
   final NearbyTeamSafetyDataSource _dataSource;
 
-  TeamSafetyRepositoryImpl({required NearbyTeamSafetyDataSource dataSource})
-      : _dataSource = dataSource;
+  TeamSafetyRepositoryImpl({required this._dataSource});
 
   @override
   Stream<List<TeamMemberStatus>> get teamStatusStream => _dataSource.statusStream;
 
   @override
-  Future<void> advertise(String teamId, String userId, String fullName) async {
-    await _dataSource.advertise(teamId, userId, fullName);
+  Future<bool> advertise(String teamId, String userId, String fullName) async {
+    return _dataSource.advertise(teamId, userId, fullName);
   }
 
   @override
   Future<void> sendStatus(TeamMemberStatus status) async {
-    await _dataSource.sendStatus(status);
+    // Publica el estado propio: emisión local + broadcast P2P a los pares.
+    // NO re-emite el stream (el controller solo consume), evita bucles.
+    _dataSource.updateMyStatus(status);
   }
 
   @override

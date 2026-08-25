@@ -66,5 +66,6 @@ flutter:
   assets:
     - assets/img/logos/
     - assets/img/icons/
+    - assets/audio/
     - .env
     - assets/graphs/
