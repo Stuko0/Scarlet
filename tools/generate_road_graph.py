@@ -33,7 +33,7 @@ def download_pbf():
 def build_graph():
     print("Construyendo grafo vial ...")
     import osmnx as ox
-    G = ox.graph_from_file(PBF_PATH, bidirectional=False, simplify=True, retain_all=False)
+    G = ox.graph_from_xml(PBF_PATH, bidirectional=False, simplify=True, retain_all=False)
     print(f"Grafo cargado: {len(G.nodes)} nodos, {len(G.edges)} aristas")
     return G
 
