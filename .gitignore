@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+tools/bolivia-latest.osm.pbf
+tools/tiles/
+tools/.venv/

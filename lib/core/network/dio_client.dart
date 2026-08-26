@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:dio_http2_adapter/dio_http2_adapter.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'auth_interceptor.dart';
 
@@ -30,11 +31,13 @@ final dioProvider = Provider<Dio>((ref) {
   final authInterceptor = ref.watch(authInterceptorProvider);
   dio.interceptors.add(authInterceptor);
 
-  dio.interceptors.add(LogInterceptor(
-    requestBody: true,
-    responseBody: true,
-    logPrint: (obj) => print('┃ DIO: $obj'),
-  ));
+  if (!kReleaseMode) {
+    dio.interceptors.add(LogInterceptor(
+      requestBody: true,
+      responseBody: true,
+      logPrint: (obj) => debugPrint('┃ DIO: $obj'),
+    ));
+  }
 
   return dio;
 });
