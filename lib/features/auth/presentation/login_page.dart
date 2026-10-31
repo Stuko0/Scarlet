@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'providers/auth_controller.dart';
+import 'package:go_router/go_router.dart';
+import 'package:scarlet_app/features/auth/presentation/providers/auth_controller.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -12,82 +13,96 @@ class LoginPage extends ConsumerStatefulWidget {
 
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _showPassword = false;
-  bool _emailVerified = false;
+  bool _checking = false;
+  String? _error;
 
   @override
   void dispose() {
     _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
-  void _onContinue() async {
+  Future<void> _login() async {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
-      _showError('Ingrese su correo electrónico');
+      setState(() => _error = 'Ingrese su correo electrónico');
       return;
     }
 
-    if (!_emailVerified) {
-      // For now, go straight to password since our backend only has login
-      setState(() {
-        _emailVerified = true;
-        _showPassword = true;
-      });
-      return;
-    }
+    setState(() {
+      _checking = true;
+      _error = null;
+    });
 
-    // Login
-    final password = _passwordController.text;
-    if (password.isEmpty) {
-      _showError('Ingrese su contraseña');
-      return;
+    try {
+      await ref.read(authControllerProvider.notifier).loginWithEmail(email);
+    } catch (e) {
+      // C3: dispositivo nuevo — hace falta el código del authenticator (TOTP)
+      // para registrar la clave de este dispositivo en el servidor.
+      if (isNeedsTotpError(e)) {
+        final code = await _promptTotp();
+        if (code != null && code.isNotEmpty) {
+          try {
+            await ref.read(authControllerProvider.notifier)
+                .loginWithEmail(email, totpCode: code);
+          } catch (e2) {
+            if (mounted) {
+              setState(() {
+                _checking = false;
+                _error = e2.toString().replaceAll('Exception: ', '');
+              });
+            }
+          }
+        } else if (mounted) {
+          setState(() {
+            _checking = false;
+            _error = 'Se requiere el código del authenticator para un dispositivo nuevo';
+          });
+        }
+        return;
+      }
+      if (mounted) {
+        setState(() {
+          _checking = false;
+          _error = e.toString().replaceAll('Exception: ', '');
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _checking = false);
+      }
     }
-
-    await ref.read(authControllerProvider.notifier).login(email, password);
   }
 
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: const Color(0xFFA20E0E)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withAlpha(50),
-                spreadRadius: 5,
-                blurRadius: 7,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.warning_amber_outlined,
-                  color: Color(0xFFA20E0E), size: 32),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  message,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFFA20E0E),
-                  ),
-                ),
-              ),
-            ],
+  /// Pide el código de 6 dígitos del authenticator (usado al registrar un
+  /// dispositivo nuevo). Devuelve el código o null si se cancela.
+  Future<String?> _promptTotp() {
+    final ctrl = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Dispositivo nuevo'),
+        content: TextField(
+          controller: ctrl,
+          keyboardType: TextInputType.number,
+          maxLength: 6,
+          autofocus: true,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          decoration: const InputDecoration(
+            labelText: 'Código del authenticator',
+            hintText: '123456',
           ),
         ),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(ctrl.text.trim()),
+            child: const Text('Continuar'),
+          ),
+        ],
       ),
     );
   }
@@ -95,16 +110,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
+    final isLoading = _checking || authState.isLoading;
 
-    // Listen for errors
-    ref.listen(authControllerProvider, (prev, next) {
-      if (next.hasError) {
-        _showError(next.error.toString().replaceAll('Exception: ', ''));
-      }
-      // Navigation is handled by GoRouter redirect — no manual push needed
-    });
-
-    final isLoading = authState.isLoading;
+    // Show error from auth state
+    if (authState.hasError && _error == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _error = authState.error.toString().replaceAll('Exception: ', '');
+          });
+        }
+      });
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -113,7 +130,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         title: const Text(
-          'Iniciar sesión o registrarse',
+          'Iniciar sesión',
           style: TextStyle(
             color: Color(0xFF656565),
             fontSize: 19,
@@ -130,113 +147,99 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           ),
         ),
       ),
-      body: Stack(
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(50, 40, 50, 0),
         children: [
-          ListView(
-            padding: const EdgeInsets.fromLTRB(50, 0, 50, 0),
-            children: [
-              Column(
-                children: [
-                  Image.asset(
-                    'assets/img/logos/app-logo.png',
-                    width: 313,
-                    height: 350,
-                  ),
-
-                  // Email field
-                  SizedBox(
-                    width: 295,
-                    child: TextField(
-                      controller: _emailController,
-                      cursorColor: Colors.black45,
-                      keyboardType: TextInputType.emailAddress,
-                      enabled: !_emailVerified,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                            RegExp('[0-9a-zA-Z@.]')),
-                      ],
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 14,
-                        fontFamily: 'DM Sans',
-                      ),
-                      decoration: const InputDecoration(
-                        labelText: 'Correo electrónico',
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // Password field (visible after email verified)
-                  if (_showPassword)
-                    SizedBox(
-                      width: 295,
-                      child: TextField(
-                        controller: _passwordController,
-                        cursorColor: Colors.black45,
-                        obscureText: true,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                              RegExp('[0-9a-zA-Z@.!#\$%^&*_]')),
-                        ],
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
-                          fontFamily: 'DM Sans',
-                        ),
-                        decoration: const InputDecoration(
-                          labelText: 'Contraseña',
-                        ),
-                        onSubmitted: (_) => _onContinue(),
-                      ),
-                    ),
-
-                  const SizedBox(height: 16),
-
-                  // Continue / Login button
-                  SizedBox(
-                    height: 44,
-                    width: 290,
-                    child: ElevatedButton(
-                      onPressed: isLoading ? null : _onContinue,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFDF8946),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(11),
-                        ),
-                      ),
-                      child: isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : Text(
-                              _showPassword ? 'Iniciar sesión' : 'Continúa',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'DM Sans',
-                              ),
-                            ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Branding footer
-                  const Image(
-                    height: 50,
-                    width: 50,
-                    image: AssetImage('assets/img/logos/cemento-base.png'),
-                  ),
-                ],
-              ),
-            ],
+          const Image(
+            height: 120,
+            width: 120,
+            image: AssetImage('assets/img/logos/cemento-base.png'),
           ),
+          const SizedBox(height: 32),
+          const Text(
+            'Ingrese su correo electrónico',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF656565),
+              fontFamily: 'DM Sans',
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: 295,
+            child: TextField(
+              controller: _emailController,
+              cursorColor: Colors.black45,
+              keyboardType: TextInputType.emailAddress,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp('[0-9a-zA-Z@.]')),
+              ],
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 14,
+                fontFamily: 'DM Sans',
+              ),
+              decoration: const InputDecoration(
+                labelText: 'Correo electrónico',
+              ),
+              onSubmitted: (_) => _login(),
+            ),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            height: 48,
+            width: 290,
+            child: ElevatedButton.icon(
+              onPressed: isLoading ? null : _login,
+              icon: const Icon(Icons.security, color: Colors.white, size: 22),
+              label: isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      'Ingresar con Identidad Digital',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'DM Sans',
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFA20E0E),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(11),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          TextButton(
+            onPressed: isLoading ? null : () => context.go('/register'),
+            child: const Text(
+              '¿No tiene identidad? Crear una',
+              style: TextStyle(
+                color: Color(0xFFDF8946),
+                fontFamily: 'DM Sans',
+                fontSize: 14,
+              ),
+            ),
+          ),
+          if (_error != null) ...[
+            const SizedBox(height: 16),
+            Text(
+              _error!,
+              style: const TextStyle(color: Color(0xFFA20E0E), fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+          ],
+          const SizedBox(height: 40),
         ],
       ),
     );

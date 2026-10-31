@@ -11,6 +11,8 @@ class User {
   final int? yearsExperience;
   final bool isActive;
   final String? dutyStatus;
+  final String? ci;
+  final String? createdAt;
 
   const User({
     required this.id,
@@ -24,6 +26,8 @@ class User {
     this.yearsExperience,
     this.isActive = true,
     this.dutyStatus,
+    this.ci,
+    this.createdAt,
   });
 
   /// Factory from JSON response (login or user GET)
@@ -45,6 +49,8 @@ class User {
       isActive: json['is_active'] as bool? ?? json['isActive'] as bool? ?? true,
       dutyStatus:
           json['duty_status'] as String? ?? json['dutyStatus'] as String?,
+      ci: json['ci'] as String?,
+      createdAt: json['created_at'] as String? ?? json['createdAt'] as String?,
     );
   }
 
@@ -61,6 +67,8 @@ class User {
       'years_experience': yearsExperience,
       'is_active': isActive,
       'duty_status': dutyStatus,
+      'ci': ci,
+      'created_at': createdAt,
     };
   }
 
@@ -76,6 +84,8 @@ class User {
     int? yearsExperience,
     bool? isActive,
     String? dutyStatus,
+    String? ci,
+    String? createdAt,
   }) {
     return User(
       id: id ?? this.id,
@@ -89,8 +99,27 @@ class User {
       yearsExperience: yearsExperience ?? this.yearsExperience,
       isActive: isActive ?? this.isActive,
       dutyStatus: dutyStatus ?? this.dutyStatus,
+      ci: ci ?? this.ci,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
+
+  /// El verify SSI solo devuelve user_id/ci/role: sin hidratar /users/me el
+  /// perfil queda vacío. Sirve para decidir si hay que reintentar la carga.
+  bool get isComplete =>
+      id > 0 && fullName.isNotEmpty && email.isNotEmpty;
+
+  bool get isOnDuty => dutyStatus == 'on-duty';
+
+  String get dutyLabel => isOnDuty ? 'EN SERVICIO' : 'FUERA DE SERVICIO';
+
+  String get displayName => fullName.isNotEmpty ? fullName : 'Usuario';
+
+  String get teamLabel => teamId != null ? 'Equipo #$teamId' : 'Sin equipo';
+
+  String get institutionLabel =>
+      institutionId != null ? 'Institución #$institutionId' : 'Sin institución';
+
 
   static int _parseInt(dynamic value) {
     if (value is int) return value;
